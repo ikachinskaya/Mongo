@@ -1,0 +1,102 @@
+/* подключиться к БД */
+use('mongod_db');
+
+//создать таблицу inventory
+use('mongod_db')
+db.inventory.insertOne();
+//================================================================
+
+//INSERT
+
+//вставить одно значение в таблицу
+use('mongod_db');
+db.inventory.insertOne({ item: "test", qty: 111, size: { h: 56, w: 15.69, uom: "cm" }, status: "F" });
+
+//вставить несколько значений в таблицу
+use('mongod_db')
+db.inventory.insertMany([
+   { item: "journal", qty: 25, size: { h: 14, w: 21, uom: "cm" }, status: "A" },
+   { item: "notebook", qty: 50, size: { h: 8.5, w: 11, uom: "in" }, status: "A" },
+   { item: "paper", qty: 100, size: { h: 8.5, w: 11, uom: "in" }, status: "D" },
+   { item: "planner", qty: 75, size: { h: 22.85, w: 30, uom: "cm" }, status: "D" },
+   { item: "postcard", qty: 45, size: { h: 10, w: 15.25, uom: "cm" }, status: "A" }
+]);
+//================================================================
+
+//SELECT
+
+//выбрать документ, где qty > 50 и < 80
+use('mongod_db');
+db.inventory.find({
+  qty: {
+    $lt: 80,
+    $gt: 50
+  }
+});
+
+//выбрать документ, где h > 10
+use('mongod_db');
+db.inventory.find({
+  "size.h": {   
+      $gt: 20    
+  }
+});
+
+//выбрать документ, где status: "D" или qty <= 30
+use('mongod_db');
+db.inventory.find({
+  $or: [
+    { status: "D" },
+    { qty: {
+      $lte: 30
+    }}
+  ]
+});
+
+//выбрать документ, где size.uom: "cm" ИЛИ  status: "D" и qty > 80
+//вернулся qty: 75 ???
+use('mongod_db');
+db.inventory.find({
+  $or: [
+    { "size.uom": "cm" },
+    { $and: [
+       { status: "D" },
+       { qty: { $gte: 80 } }
+    ]}
+  ]
+});
+
+//================================================================
+
+//UPDATE
+
+//обновить документы, у кого статус "А"
+use('mongod_db');
+db.inventory.updateMany({
+  status: "A"
+},
+{
+  $set: { status: "accepted" }
+);
+//================================================================
+
+//DELETE
+
+//удалить из таблицы только те записи, где есть firstName, lastName, age
+use('my_first_DB_Mongo');
+db.users.deleteMany({
+  firstName: { $exists: true },
+  lastName: { $exists: true },
+  age: { $exists: true },
+});
+//================================================================
+
+//deleteOne - удалит первого, прошедшего фильтрацию
+
+//удалить таблицу
+//вернет true. если коллекции нет - false
+use('my_first_DB_Mongo');
+db.inventory.drop();
+//================================================================
+
+//Id в mongo - это hash
