@@ -1,0 +1,115 @@
+
+use('mongod_db');
+
+db.createCollection('phones', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object", 
+      required: ['model', 'price', 'amount', 'brand', 'specs'],
+      properties: {
+        model: {
+          bsonType: "string", 
+        },
+         price: {
+          bsonType: "number",
+        },
+         amount: {
+          bsonType: "int",
+        },
+         brand: {
+          bsonType: "string",
+        },
+         specs: {
+          bsonType: "object",
+          required: ['cpu', 'ram', 'storage'],
+          properties: {
+            cpu: {
+              bsonType: "string",              
+            },
+            ram: {
+              bsonType: "number",
+            },
+            storage: {
+              bsonType: "number",
+            }
+          }
+        },
+        lastArrival: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+db.phones.drop();
+//================================================================
+
+use('mongod_db');
+db.phones.insertMany([
+  { 
+    model: "XAZ-5000",
+    brand: "bPhone",
+    amount: 500,
+    price: 9999,
+    specs: {
+      cpu: "bestCPU 4.001GHz",
+      ram: 8,
+      storage: 256
+    }
+  },
+    { 
+    model: "XAZ-5001",
+    brand: "bPhone",
+    amount: 1500,
+    price: 15999.99,
+    specs: {
+      cpu: "bestCPU 4.111GHz",
+      ram: 8,
+      storage: 512
+    }
+  },
+    { 
+    model: "XAZ-5002",
+    brand: "bPhone",
+    amount: 200,
+    price: 7999.99,
+    specs: {
+      cpu: "40GHz",
+      ram: 4,
+      storage: 32
+    }
+  },
+    { 
+    model: "XAZ-5003",
+    brand: "bPhone",
+    amount: 800,
+    price: 12999.99,
+    specs: {
+      cpu: "abc",
+      ram: 8,
+      storage: 256
+    }
+  },  { 
+    model: "XAZ-5004",
+    brand: "bPhone",
+    amount: 900,
+    price: 11599.99,
+    specs: {
+      cpu: "qwerty",
+      ram: 8,
+      storage: 128
+    }
+  }
+]);
+//==============
+
+//не пройдет валидацию
+use('mongod_db');
+db.phones.insertOne({
+  name: "test"
+});
+
+//================================================================
+
+//В монго невозможно установить ограничение уникальности.
