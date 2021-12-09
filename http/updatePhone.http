@@ -1,9 +1,9 @@
-POST http://localhost:3000/ HTTP/1.1
+PATCH http://localhost:3000/61b14df70079675612a09e36 
 Content-Type: application/json
 
 {
-  "brand": "test999",
-  "model": "test999",
+  "brand": "update2",
+  "model": "update2",
   "price": 123456,
   "amount": 100,
   "specs": {

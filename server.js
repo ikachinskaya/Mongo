@@ -9,7 +9,7 @@ const DB_NAME = process.env.DB_NAME || "mongoose_db";
 mongoose.connect(`mongodb://localhost:27017/${DB_NAME}`).catch((error) => {
   //в этом месте можно создать логгер ошибок
   console.log(error);
-  process.exit(1);
+  process.exit(1); //закрываем ноду. все, кроме 0 - ошибка. 0-ок
 });
 
 const phoneSpecsSchema = yup.object().shape({
@@ -61,6 +61,8 @@ const app = express();
 
 app.use(express.json());
 
+//================================================================
+//CRUD
 app.post("/", async (req, res, next) => {
   try {
     const { body } = req;
@@ -78,6 +80,29 @@ app.get("/", async (req, res, next) => {
   } catch (error) {}
 });
 
+app.patch("/:id", async (req, res, next) => {
+  try {
+    const {
+      body,
+      params: { id },
+    } = req;
+    const updatedPhone = await Phone.findOneAndUpdate({ _id: id }, body, {
+      returnDocument: "after",
+    });
+    res.status(200).send(updatedPhone);
+  } catch (error) {}
+});
+
+app.delete("/:id", async (req, res, next) => {
+  try {
+    const {
+      params: { id },
+    } = req;
+    const deletedPhone = await Phone.findOneAndDelete({ _id: id });
+    res.status(200).send(deletedPhone);
+  } catch (error) {}
+});
+//================================================================
 const server = http.createServer(app);
 
 server.listen(PORT, () => {
