@@ -1,0 +1,116 @@
+use('aggregations_products_db');
+
+db.createCollection('manufacturers', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+           bsonType: 'string'
+        }       
+      }
+    }
+  }
+});
+
+db.createCollection('products', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['price', 'amount', 'name', 'manufacturerId'],
+      properties: {
+        price: {
+          bsonType: 'number'
+        },
+        amount: {
+          bsonType: 'number'
+        },
+        name: {
+          bsonType: 'string'
+        },
+        manufacturerId: {
+          bsonType: 'objectId'
+        }
+      }
+    }
+  }
+});
+//================================================================
+
+use('aggregations_products_db');
+db.manufacturers.insertMany([
+  {name: "Apple"},
+  {name: "Samsung"},
+  {name: "Nokia"}
+]);
+//================================================================
+use('aggregations_products_db');
+db.products.insertMany([
+  {
+    name: "Iphone 90",
+    price: 999999,
+    amount: 999,
+    manufacturerId: new ObjectId('61b274ade20d8820c259182c')
+  },
+    {
+    name: "Galaxy 1000",
+    price: 14999,
+    amount: 250,
+    manufacturerId: new ObjectId('61b274ade20d8820c259182d')
+  },
+   {
+    name: "Galaxy 2000",
+    price: 124999,
+    amount: 500,
+    manufacturerId: new ObjectId('61b274ade20d8820c259182d')
+  },
+    {
+    name: "Nokia 5555",
+    price: 999,
+    amount: 2,
+    manufacturerId: new ObjectId('61b274ade20d8820c259182e')
+  },
+]);
+//================================================================
+
+//все телефоны и его производители
+use('aggregations_products_db');
+db.products.aggregate([
+  {
+    $lookup: {
+      from: 'manufacturers',
+      localField: 'manufacturerId',
+      foreignField: '_id',
+      as: 'manufacturer'
+    }
+  },
+  { $unwind: "$manufacturer" },
+  { $unset: "manufacturerId"},
+]);
+//================================================================
+
+//сколько у каждого производителя есть товаров
+use('aggregations_products_db');
+db.products.aggregate([
+  {
+    $lookup: {
+      from: 'manufacturers',
+      localField: 'manufacturerId',
+      foreignField: '_id',
+      as: 'manufacturer'
+    }
+  },
+  { $unwind: "$manufacturer" },
+  { $unset: "manufacturerId"},
+  { $group: {_id: "$manufacturer.name", total: {$count: {}}}}
+]);
+//================================================================
+
+/*
+lookup - левый JOIN
+unwind - значение поля массива заменяет элементом
+unset - убирает поля из документа
+
+lookup в mongoose - populate
+*/
